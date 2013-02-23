@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+
+    <title> Bar chart plugin </title>
+    <link href="../css/default_main.css" rel="stylesheet">
+
+
+    <style type="text/css">
+
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="barchart" id="barchart-anchor"></div>
+    <div class="barchart" id="barchart-anchor2"></div>
+
+    <script src="dependencies/jquery.1.8.3.js"></script>
+    <script src="dependencies/d3.v2.js"></script>
+    <script src="../scripts/mbarchart.js"></script>
+
+    <script>
+
+        var data = [],
+            data2, onmouseover, onclick, x;
+
+        for(x = 0; x<30; x++) {
+            data.push({_x: x, _y:  Math.floor(Math.random() * 100) })
+        }
+
+        data2 = [{"_groupby":"184.51.126.80","_count":1197,"intval":1197,"count":1197,"groupby":"184.51.126.80"},
+                 {"_groupby":"23.0.160.201","_count":207,"intval":207,"count":207,"groupby":"23.0.160.201"},
+                 {"_groupby":"65.55.69.140","_count":132,"intval":132,"count":132,"groupby":"65.55.69.140"},
+                 {"_groupby":"65.55.227.140","_count":130,"intval":130,"count":130,"groupby":"65.55.227.140"},
+                 {"_groupby":"70.38.0.134","_count":113,"intval":113,"count":113,"groupby":"70.38.0.134"},
+                 {"_groupby":"23.0.160.200","_count":109,"intval":109,"count":109,"groupby":"23.0.160.200"},
+                 {"_groupby":"65.54.81.203","_count":107,"intval":107,"count":107,"groupby":"65.54.81.203"},
+                 {"_groupby":"184.51.126.91","_count":107,"intval":107,"count":107,"groupby":"184.51.126.91"},
+                 {"_groupby":"184.51.126.107","_count":80,"intval":80,"count":80,"groupby":"184.51.126.107"},
+                 {"_groupby":"23.3.13.105","_count":72,"intval":72,"count":72,"groupby":"23.3.13.105"}]
+
+
+
+
+        onmouseover = function (data, index) {
+            console.log(data)
+            console.log("mouseover")
+        }
+
+        onclick = function (data, index) {
+            console.log(data)
+            console.log("click")
+        }
+
+        $("#barchart-anchor").mbarchart({data: data,
+                                         tooltip: true,
+                                         labels: {ylabel: "This is the y label",
+                                                  ypadding: 50,
+                                                  xlabel: "Mandiant barchart label",
+                                                  xpadding: 60,
+                                                  mainlabel: "bar chart"},
+                                         margins: {l:50, b: 50},
+                                         axis: { x : { rotateText: "angled"}},
+                                         events: {onclick:onclick,
+                                                  onmouseover:onmouseover
+                                                 }
+                                         });
+
+        $("#barchart-anchor2").mbarchart({data: data2,
+            tooltip: true,
+            labels: {ylabel: "This is the y label",
+                     ypadding: 50,
+                     xlabel: "Mandiant barchart label",
+                     xpadding: 95,
+                     mainlabel: "bar chart"},
+            margins: {l:40, b: 80},
+            axis: { x : { rotateText: "angled",
+                          xoffset   : -40,
+                          yoffset   : 35
+                        }
+                  },
+            events: {onclick:onclick,
+                     onmouseover:onmouseover},
+            accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
+        });
+
+
+
+    </script>
+
+</body>
+
+</html>
