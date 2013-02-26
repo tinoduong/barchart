@@ -9,14 +9,6 @@
     /*border:1px solid red;*/
 }
 
-.bar {
-    fill: steelBlue;
-}
-
-.bar.hover {
-    fill: red;
-}
-
 .mtooltip {
     /*width:100px;*/
     height:20px;
@@ -25,4 +17,24 @@
     border-radius: 4px;
     padding-left: 5px;
     padding-right: 5px;
+}
+
+.bar {
+    fill: steelBlue;
+}
+
+.bar.hover {
+    fill: red;
+}
+
+.series-0 {
+    fill: steelblue;
+}
+
+.series-1 {
+    fill: lightGreen;
+}
+
+.series-2 {
+    fill: brown;
 }
