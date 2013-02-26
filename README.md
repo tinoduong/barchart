@@ -25,6 +25,9 @@ hover           : hover state for a bar
 axis-label      : on both labels x and y axis
 y-axis-label    : the label for the y axis (use this to set the font-size)
 x-axis-label    : the label for the x axis (use this to set the font-size)
+series-N        : where N in an integer from 0 to X. This label is when the graph
+                  is in stacked mode. For each series in the data being passed in, we can
+                  specify the bar color
 
 Options:
 
@@ -44,12 +47,21 @@ in the view can be arbitrary. Use these parameters to set up the calendar plugin
 
 A) data (required)
 
-This will be the data displayed in the bar chart. It will be an array of objects, each object must have at least
-two values (one representing data for the x axis, one for the y-axis)
+This will be the data displayed in the bar chart. It will be an array of objects or an array of arrays. Each data point
+must have at least two values (one representing data for the x axis, one for the y-axis)
 
-E.G: data = [{_groupby: XX, _count: YY}, {_groupby: XX, _count: YY}, {_groupby: XX, _count: YY}]
+E.G - 1: data = [{_groupby: XX, _count: YY}, {_groupby: XX, _count: YY}, {_groupby: XX, _count: YY}]
 
-values: array[objects]
+Represents a normal bar chart with a single series of data
+
+E.G - 2: data = [[{_groupby: 1, _count: 123}, {_groupby: 2, _count: 564}, {_groupby: 3, _count: 234}],
+                 [{_groupby: 1, _count: 233}, {_groupby: 2, _count: 234}, {_groupby: 3, _count: 567}],
+                 [{_groupby: 1, _count: 563}, {_groupby: 2, _count: 864}, {_groupby: 3, _count: 366}]]
+
+Represents data for "stacked" bar chart. In the data array, we see three seperate series being passed in. Each
+element in the series correlates to the X values of other series elements by index in the array.
+
+values: array[objects] or array[array[objects], array[objects], array[objects]]
 
 
 B) labels - (optional)
