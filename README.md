@@ -29,6 +29,14 @@ series-N        : where N in an integer from 0 to X. This label is when the grap
                   is in stacked mode. For each series in the data being passed in, we can
                   specify the bar color
 
+mbarchart-legend : the container for the legend. The legend is positioned absolutely, so use top, right, left, etc
+                   to position it in the desired spot
+series-box       : the box representing each data series. The number of these boxes should match the number of
+                   data series you passed in
+mbarchart-legend-label : main label for the legend
+
+
+
 Options:
 
 This mbarchart was built to be data agnostic, meaning that the data it displays
@@ -43,6 +51,7 @@ in the view can be arbitrary. Use these parameters to set up the calendar plugin
     G) meta
     H) tooltip
     I) accessors
+    J) legend
 
 
 A) data (required)
@@ -169,6 +178,17 @@ E.G: if your data array contains objects like data = [{_groupby:XX, _count:XX}]
 then accessors: {getTimestamp: function (d) { return d._groupby,
                  getCount: function (d) { return d._count}}
 
+
+
+J) legend - (optional)
+
+If you want a legend to be created use this parameter. The legend will can be styled via css, position, size
+and colours are all configurable.
+
+ legend:{
+            label: "Histogram Legend",       //the label for the entire legend
+            serieslabels: ["first", "second", "third"]  // the label for each series
+            },
 
 
 
