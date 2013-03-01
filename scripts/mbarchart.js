@@ -4,7 +4,7 @@
 
     var MBAR_CLASS           = "mbarchart",
         MBAR_LABEL           = "mbarchart-label",
-        MBAR_HTML            = "<div class='" + MBAR_CLASS + "'> </div> <div class='" + MBAR_LABEL + " label-main'> </div>",
+        MBAR_HTML            = "<div class='" + MBAR_CLASS + "' style='position:relative'  > </div> <div class='" + MBAR_LABEL + " label-main'> </div>",
         MIN_M_DIMENSIONS     = {width: 600, height: 300},
         DEFAULT_MARGIN       = {top: 20, right: 20, bottom: 30, left: 30},
         LABEL_MARGIN_OFFSET  = {left: 20, bottom:20, top: 20},
@@ -107,13 +107,54 @@
         return normalized;
     }
 
+    /**
+     *
+     * Determine the data necessary to generate the legend
+     *
+     * @param lData - the hash passed in by the user in the options
+     * @param data  - the series data.
+     * @return {*}
+     */
+    function calcLegendDataParams (lData, data) {
+
+        var toRet,
+            index,
+            tlabel,
+            label, serieslabels;
+
+        //If no data passed in, we are done
+        if(!lData) {
+            return toRet;
+        }
+
+        label = (typeof lData.label === "string") ? lData.label : "";
+
+        lData.serieslabels = lData.serieslabels || [];
+        serieslabels = [];
+
+        for(index = 0 ; index < data.length; index++) {
+
+            tlabel = lData.serieslabels[index] || "Series " + index;
+            serieslabels.push(tlabel);
+        }
+
+        toRet = {
+
+            label : label,
+            serieslabels : serieslabels
+        }
+
+        return toRet;
+    };
+
     Barchart = function(options) {
 
-        var self = this,
-            opt  = options,
+        var self   = this,
+            opt    = options,
+            events = opt.events || {},
+            accessors = opt.accessors || {},
             default_dimensions,
-            parent_el_dimensions,
-            render;
+            parent_el_dimensions;
 
         self.anchorSelector     = opt.rootSelector + " ." + MBAR_CLASS;
         self.$mainLabel         = $(opt.rootSelector + " .label-main");
@@ -126,23 +167,19 @@
                                 calcDimensions(opt.dimensions, default_dimensions) :
                                 calcDimensions(parent_el_dimensions, default_dimensions);
 
-        self.series     = opt.series;
-        self.margins    = calcMargins(opt.labels, opt.margins);
-        self.labels     = opt.labels || {};
-        self.axis       = calAxisParams(opt.axis);
-        self.useTooltip = !!opt.useTooltip;
+        self.margins     = calcMargins(opt.labels, opt.margins);
+        self.labels      = opt.labels || {};
+        self.axis        = calAxisParams(opt.axis);
+        self.useTooltip  = !!opt.useTooltip;
 
-        self.getX        = (opt.accessors && opt.accessors.getX) ?
-                             opt.accessors.getX : function (d) {return d._x};
+        self.getX        = accessors.getX || function (d) {return d._x};
+        self.getY        = accessors.getY || function (d) {return d._y};
 
-        self.getY        = (opt.accessors && opt.accessors.getY) ?
-                             opt.accessors.getY : function (d) {return d._y};
+        self.onclick     = events.onclick;
+        self.onmouseover = events.onmouseover;
 
-        self.onclick     = (opt.events && opt.events.onclick) ?
-                             opt.events.onclick : null;
-
-        self.onmouseover = (opt.events && opt.events.onmouseover) ?
-                             opt.events.onmouseover : null;
+        self.renderLegend = opt.legend ? true : false;
+        self.legendParam  = calcLegendDataParams(opt.legend, opt.data);
 
         self.meta  = opt.meta || {};
         self.data  = calcStackedData(opt.data, self.getX, self.getY);
@@ -176,6 +213,48 @@
                     .attr("class", "mtooltip")
                     .style("opacity", 1e-6)
                     .style("position", "absolute")
+
+        if(self.renderLegend) {
+            self._createLegend();
+        }
+
+    };
+
+
+    Barchart.prototype._createLegend = function () {
+
+        var self   = this,
+            data   = self.legendParam,
+            labels = data.serieslabels;
+
+        function createRow(label, index) {
+
+            var toRet = "<div style='display:inline-block;' class='series-box series-"+ index + "'></div>" +
+                        "<span class='series-label'>"+ label +"</span>"
+
+            return toRet;
+        }
+
+        self.legend = d3.select(self.anchorSelector)
+                        .append("div")
+                        .attr("class", "mbarchart-legend")
+                        .style("position", "absolute")
+
+        self.legend
+            .selectAll("div")
+            .data(data.serieslabels)
+            .enter()
+            .append("div")
+            .attr("class", function (d) { return "mbarchart-legend-series-wrapper"})
+            .html(function(d, i) {
+                return createRow(labels[i], i);
+            })
+
+        //Add the main label div
+        self.legend
+            .append("div")
+            .attr("class", "mbarchart-legend-label")
+            .text(function(d) {return data.label;})
 
     };
 
@@ -261,6 +340,12 @@
 
     };
 
+    /**
+     * This function adds the event handlers necessary for the tooltip,
+     * onclick and mouseover callbacks.
+     *
+     * @private
+     */
     Barchart.prototype._addHandlers = function ()
     {
         var self = this;
@@ -430,7 +515,7 @@
                                 useTooltip:o.tooltip,
                                 data: o.data,
                                 labels: o.labels,
-                                series:o.series,
+                                legend:o.legend,
                                 margins: o.margins,
                                 axis: o.axis,
                                 dimensions: o.dimensions,

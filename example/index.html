@@ -124,10 +124,8 @@
                           yoffset   : 35
                         }
                   },
-            legend: true,
-            series: [{label: "first"},
-                     {label: "second"},
-                     {label: "third"}],
+            legend:{label: "Histogram Legend",
+                    serieslabels: ["first", "second", "third"]},
             events: {onclick:onclick,
                      onmouseover:onmouseover},
             accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
