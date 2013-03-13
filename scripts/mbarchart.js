@@ -4,7 +4,7 @@
 
     var MBAR_CLASS           = "mbarchart",
         MBAR_LABEL           = "mbarchart-label",
-        MBAR_HTML            = "<div class='" + MBAR_CLASS + "'> </div> <div class='" + MBAR_LABEL + " label-main'> </div>",
+        MBAR_HTML            = "<div class='" + MBAR_CLASS + "' style='position:relative'  > </div> <div class='" + MBAR_LABEL + " label-main'> </div>",
         MIN_M_DIMENSIONS     = {width: 600, height: 300},
         DEFAULT_MARGIN       = {top: 20, right: 20, bottom: 30, left: 30},
         LABEL_MARGIN_OFFSET  = {left: 20, bottom:20, top: 20},
@@ -85,10 +85,74 @@
         return toRet;
     };
 
+    /**
+     * For stacked data we need to normalize the data into proper
+     * readable able format
+     * @param data
+     */
+    function calcStackedData (data, getX, getY) {
+
+        var merged,
+            normalized;
+
+        merged     = d3.merge(data);
+        normalized = d3.nest()
+                        .key(function(d) {return getX(d);})
+                        .entries(merged);
+
+        normalized.forEach(function(obj) {
+           obj.total = d3.sum(obj.values, getY);
+        });
+
+        return normalized;
+    }
+
+    /**
+     *
+     * Determine the data necessary to generate the legend
+     *
+     * @param lData - the hash passed in by the user in the options
+     * @param data  - the series data.
+     * @return {*}
+     */
+    function calcLegendDataParams (lData, data) {
+
+        var toRet,
+            index,
+            tlabel,
+            label, serieslabels;
+
+        //If no data passed in, we are done
+        if(!lData) {
+            return toRet;
+        }
+
+        label = (typeof lData.label === "string") ? lData.label : "";
+
+        lData.serieslabels = lData.serieslabels || [];
+        serieslabels = [];
+
+        for(index = 0 ; index < data.length; index++) {
+
+            tlabel = lData.serieslabels[index] || "Series " + index;
+            serieslabels.push(tlabel);
+        }
+
+        toRet = {
+
+            label : label,
+            serieslabels : serieslabels
+        }
+
+        return toRet;
+    };
+
     Barchart = function(options) {
 
-        var self = this,
-            opt  = options,
+        var self   = this,
+            opt    = options,
+            events = opt.events || {},
+            accessors = opt.accessors || {},
             default_dimensions,
             parent_el_dimensions;
 
@@ -103,29 +167,29 @@
                                 calcDimensions(opt.dimensions, default_dimensions) :
                                 calcDimensions(parent_el_dimensions, default_dimensions);
 
-        self.margins    = calcMargins(opt.labels, opt.margins);
-        self.labels     = opt.labels || {};
-        self.axis       = calAxisParams(opt.axis);
-        self.useTooltip    = !!opt.useTooltip;
+        self.margins     = calcMargins(opt.labels, opt.margins);
+        self.labels      = opt.labels || {};
+        self.axis        = calAxisParams(opt.axis);
+        self.useTooltip  = !!opt.useTooltip;
 
-        self.getX  = (opt.accessors && opt.accessors.getX) ?
-                         opt.accessors.getX : function (d) {return d._x};
+        self.getX        = accessors.getX || function (d) {return d._x};
+        self.getY        = accessors.getY || function (d) {return d._y};
 
-        self.getY  = (opt.accessors && opt.accessors.getY) ?
-                         opt.accessors.getY : function (d) {return d._y};
+        self.onclick     = events.onclick;
+        self.onmouseover = events.onmouseover;
 
-        self.onclick    = (opt.events && opt.events.onclick) ?
-                               opt.events.onclick : null;
-
-        self.onmouseover = (opt.events && opt.events.onmouseover) ?
-                                opt.events.onmouseover : null;
+        self.renderLegend = opt.legend ? true : false;
+        self.legendParam  = calcLegendDataParams(opt.legend, opt.data);
 
         self.meta  = opt.meta || {};
-        self.data  = opt.data;
+        self.data  = calcStackedData(opt.data, self.getX, self.getY);
+
 
         self._createSvg();
         self._processAxis(self.data);
-        self._drawBars();
+
+        self._drawStackedBars();
+
     };
 
     /**
@@ -150,10 +214,47 @@
                     .style("opacity", 1e-6)
                     .style("position", "absolute")
 
+        if(self.renderLegend) {
+            self._createLegend();
+        }
 
-        $(self.anchorSelector).on("mouseleave", function() {
-            self.svg.selectAll(".bar").classed("hover", false);
-        })
+    };
+
+
+    Barchart.prototype._createLegend = function () {
+
+        var self   = this,
+            data   = self.legendParam,
+            labels = data.serieslabels;
+
+        function createRow(label, index) {
+
+            var toRet = "<div style='display:inline-block;' class='series-box series-"+ index + "'></div>" +
+                        "<span class='series-label'>"+ label +"</span>"
+
+            return toRet;
+        }
+
+        self.legend = d3.select(self.anchorSelector)
+                        .append("div")
+                        .attr("class", "mbarchart-legend")
+                        .style("position", "absolute")
+
+        self.legend
+            .selectAll("div")
+            .data(data.serieslabels)
+            .enter()
+            .append("div")
+            .attr("class", function (d) { return "mbarchart-legend-series-wrapper"})
+            .html(function(d, i) {
+                return createRow(labels[i], i);
+            })
+
+        //Add the main label div
+        self.legend
+            .append("div")
+            .attr("class", "mbarchart-legend-label")
+            .text(function(d) {return data.label;})
 
     };
 
@@ -173,10 +274,12 @@
             yAxis  = d3.svg.axis().scale(yRange).orient("left"),
             axisParam = self.axis,
             labels    = self.labels,
+            funcX     = function (d) { return d.key;},
+            funcY     = function (d) { return d.total;},
             padding;
 
-        xRange.domain(data.map(self.getX));
-        yRange.domain([0, d3.max(data, self.getY)]);
+        xRange.domain(data.map(funcX));
+        yRange.domain([0, d3.max(data, funcY)]);
 
         self.xRange = xRange;
         self.yRange = yRange;
@@ -237,18 +340,20 @@
 
     };
 
-    Barchart.prototype._drawBars = function () {
-
-        var self   = this,
-            data   = self.data,
-            height = self.height,
-            x      = self.xRange,
-            y      = self.yRange;
+    /**
+     * This function adds the event handlers necessary for the tooltip,
+     * onclick and mouseover callbacks.
+     *
+     * @private
+     */
+    Barchart.prototype._addHandlers = function ()
+    {
+        var self = this;
 
         function mouseover(d, i) {
 
             if(self.useTooltip) {
-                self.svg.selectAll(".bar").classed("hover", false);
+
                 this.classList.add("hover");
 
                 self.tooltip.transition()
@@ -272,47 +377,74 @@
 
         function mouseout(d, i) {
 
+            self.svg.selectAll(".bar").classed("hover", false);
+
             self.tooltip.transition()
                 .duration(300)
                 .style("opacity", 1e-6);
         }
 
-        self.svg
-            .append("g")
-            .attr("class", "bars")
-            .selectAll(".bar")
-            .data(data)
-            .enter()
-            .append("rect")
-            .attr("class", "bar")
-            .attr("x", function(d) { return x(self.getX(d)); })
-            .attr("width", x.rangeBand())
-            .attr("y", function(d) { return y(self.getY(d)); })
-            .attr("height", function(d) { return height - y(self.getY(d)); })
-            .datum(function(d) { return {data: d, meta: self.meta};})
-
-
         //For efficiency, only add event handlers if they are necessary
         if (self.onclick) {
-            self.svg
-                .selectAll(".bar")
-                .on("click", self.onclick);
+            self.bars.on("click", self.onclick);
         }
 
         if (self.onmouseover || self.useTooltip) {
-            self.svg
-                .selectAll(".bar")
-                .on("mouseover", mouseover)
+            self.bars.on("mouseover", mouseover)
         }
 
         if(self.useTooltip) {
 
-            self.svg
-                .selectAll(".bar")
+            self.bars
                 .on("mousemove", mousemove)
                 .on("mouseout", mouseout);
         }
+    }
 
+    /**
+     * This function will draw the bars when stacked mode
+     * @private
+     */
+    Barchart.prototype._drawStackedBars = function () {
+
+        var self   = this,
+            data   = self.data,
+            height = self.height,
+            x      = self.xRange,
+            y      = self.yRange,
+            top;
+
+        self.svg
+            .append("g")
+            .attr("class", "bars")
+            .selectAll(".bar-group")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("class", "bar-group")
+            .each(function (d) {
+
+                top = height;
+                d3.select(this)
+                    .selectAll(".bar")
+                    .data(d.values)
+                    .enter()
+                    .append("rect")
+                    .attr("x", function(d) { return x(self.getX(d)); })
+                    .attr("width", x.rangeBand())
+                    .attr("class", function(d,i) {return "bar series-" + i})
+                    .attr("y", function(d) {
+                        top = top - (height - y(self.getY(d)));
+                        return top;
+                    })
+                    .attr("height", function(d) {return height - y(self.getY(d));})
+                    .datum(function(d) { return {data:d, meta: self.meta};})
+
+            })
+
+
+        self.bars = d3.selectAll(self.anchorSelector + " .bar");
+        self._addHandlers();
     };
 
     var methods = {
@@ -320,6 +452,7 @@
         init : function(options) {
 
             var data = this.data(MBAR_CLASS),
+                tmp  = [],
                 o    = options || {},
                 obj;
 
@@ -354,6 +487,27 @@
                 return this;
             }
 
+            //Sanity Check: -----------------------------
+            // If user passes in just an array of data
+            // turn it into an array of arrays. This is done
+            // for backwards compatibility after the stacked
+            // data was entered.
+            if(!$.isArray(o.data[0])) {
+                tmp.push(o.data);
+                o.data = tmp;
+            }
+
+            //Sanity Check: -----------------------------
+            // If user passes in series meta data, they must
+            // have one for each data series
+            if(o.series && o.series.length !== o.data.length) {
+
+                console.error("Warning: malformed series entry. "+
+                              "There must be a series element for each data series");
+                return this;
+            }
+
+
             //Render base html wrapper
             this.html(MBAR_HTML);
 
@@ -361,6 +515,7 @@
                                 useTooltip:o.tooltip,
                                 data: o.data,
                                 labels: o.labels,
+                                legend:o.legend,
                                 margins: o.margins,
                                 axis: o.axis,
                                 dimensions: o.dimensions,
@@ -373,7 +528,11 @@
             return this;
         },
 
-        reset : function () {
+        destroy : function () {
+
+            $(this).data(null);
+            d3.selectAll(this.selector + " svg").remove();
+            this.empty();
 
             return this;
         }

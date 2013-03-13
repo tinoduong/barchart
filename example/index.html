@@ -19,6 +19,7 @@
 
     <div class="barchart" id="barchart-anchor"></div>
     <div class="barchart" id="barchart-anchor2"></div>
+    <div class="barchart" id="barchart-anchor3"></div>
 
     <script src="dependencies/jquery.1.8.3.js"></script>
     <script src="dependencies/d3.v2.js"></script>
@@ -27,29 +28,49 @@
     <script>
 
         var data = [],
-            data2, onmouseover, onclick, x;
+            data2, data3, data4, onmouseover, onclick, x;
 
-        for(x = 0; x<30; x++) {
+        for(x = 0; x<50; x++) {
             data.push({_x: x, _y:  Math.floor(Math.random() * 100) })
         }
 
-        data2 = [{"_groupby":"184.51.126.80","_count":1197,"intval":1197,"count":1197,"groupby":"184.51.126.80"},
-                 {"_groupby":"23.0.160.201","_count":207,"intval":207,"count":207,"groupby":"23.0.160.201"},
-                 {"_groupby":"65.55.69.140","_count":132,"intval":132,"count":132,"groupby":"65.55.69.140"},
-                 {"_groupby":"65.55.227.140","_count":130,"intval":130,"count":130,"groupby":"65.55.227.140"},
-                 {"_groupby":"70.38.0.134","_count":113,"intval":113,"count":113,"groupby":"70.38.0.134"},
-                 {"_groupby":"23.0.160.200","_count":109,"intval":109,"count":109,"groupby":"23.0.160.200"},
-                 {"_groupby":"65.54.81.203","_count":107,"intval":107,"count":107,"groupby":"65.54.81.203"},
-                 {"_groupby":"184.51.126.91","_count":107,"intval":107,"count":107,"groupby":"184.51.126.91"},
-                 {"_groupby":"184.51.126.107","_count":80,"intval":80,"count":80,"groupby":"184.51.126.107"},
-                 {"_groupby":"23.3.13.105","_count":72,"intval":72,"count":72,"groupby":"23.3.13.105"}]
+        data2 = [{"groupby":"184.51.126.80","_count":1197,"intval":1197},
+                 {"groupby":"23.0.160.201","_count":207,"intval":207},
+                 {"groupby":"65.55.69.140","_count":132,"intval":132},
+                 {"groupby":"65.55.227.140","_count":130,"intval":130},
+                 {"groupby":"70.38.0.134","_count":113,"intval":113},
+                 {"groupby":"23.0.160.200","_count":109,"intval":109},
+                 {"groupby":"65.54.81.203","_count":107,"intval":1800},
+                 {"groupby":"184.51.126.91","_count":107,"intval":107},
+                 {"groupby":"184.51.126.107","_count":80,"intval":80},
+                 {"groupby":"23.3.13.105","_count":72,"intval":72}]
 
+        data3 = [{"groupby":"184.51.126.80","_count":1197,"intval":300},
+            {"groupby":"23.0.160.201","_count":207,"intval":207},
+            {"groupby":"65.55.69.140","_count":132,"intval":42},
+            {"groupby":"65.55.227.140","_count":130,"intval":130},
+            {"groupby":"70.38.0.134","_count":113,"intval":56},
+            {"groupby":"23.0.160.200","_count":109,"intval":200},
+            {"groupby":"65.54.81.203","_count":107,"intval":500},
+            {"groupby":"184.51.126.91","_count":107,"intval":97},
+            {"groupby":"184.51.126.107","_count":80,"intval":80},
+            {"groupby":"23.3.13.105","_count":72,"intval":24}]
 
+        data4 = [{"groupby":"184.51.126.80","_count":1197,"intval":700},
+            {"groupby":"23.0.160.201","_count":607,"intval":1607},
+            {"groupby":"65.55.69.140","_count":132,"intval":500},
+            {"groupby":"65.55.227.140","_count":130,"intval":620},
+            {"groupby":"70.38.0.134","_count":113,"intval":250},
+            {"groupby":"23.0.160.200","_count":109,"intval":34},
+            {"groupby":"65.54.81.203","_count":107,"intval":900},
+            {"groupby":"184.51.126.91","_count":107,"intval":80},
+            {"groupby":"184.51.126.107","_count":80,"intval":80},
+            {"groupby":"23.3.13.105","_count":72,"intval":24}]
 
 
         onmouseover = function (data, index) {
-            console.log(data)
-            console.log("mouseover")
+//            console.log(data)
+//            console.log("mouseover")
         }
 
         onclick = function (data, index) {
@@ -89,6 +110,26 @@
             accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
         });
 
+
+        $("#barchart-anchor3").mbarchart({data: [data2, data3, data4],
+            tooltip: true,
+            labels: {ylabel: "This is the y label",
+                     ypadding: 50,
+                     xlabel: "Mandiant barchart label",
+                     xpadding: 95,
+                     mainlabel: "bar chart"},
+            margins: {l:40, b: 80},
+            axis: { x : { rotateText: "angled",
+                          xoffset   : -40,
+                          yoffset   : 35
+                        }
+                  },
+            legend:{label: "Histogram Legend",
+                    serieslabels: ["first", "second", "third"]},
+            events: {onclick:onclick,
+                     onmouseover:onmouseover},
+            accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
+        });
 
 
     </script>

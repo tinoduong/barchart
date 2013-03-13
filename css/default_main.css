@@ -9,14 +9,6 @@
     /*border:1px solid red;*/
 }
 
-.bar {
-    fill: steelBlue;
-}
-
-.bar.hover {
-    fill: red;
-}
-
 .mtooltip {
     /*width:100px;*/
     height:20px;
@@ -25,4 +17,51 @@
     border-radius: 4px;
     padding-left: 5px;
     padding-right: 5px;
+}
+
+.bar {
+    fill: steelBlue;
+}
+
+.bar.hover {
+    fill: red;
+}
+
+.series-0 {
+    fill: steelblue;
+    background-color: steelblue;
+}
+
+.series-1 {
+    fill: lightGreen;
+    background-color: lightGreen;
+}
+
+.series-2 {
+    fill: brown;
+    background-color: brown;
+}
+
+.mbarchart-legend {
+
+    top:15px;
+    right:10px;
+    border-radius: 4px;
+    border: black;
+    box-shadow: 1px 1px 3px rgba(0,0,0, 0.4);
+    width: 150px;
+
+    padding:10px 5px 5px 5px;
+}
+
+.series-box {
+    width:10px;
+    height:10px;
+    border:1px solid black;
+
+    margin-right: 10px;
+}
+
+.mbarchart-legend-label {
+    margin-top: 10px;
 }
