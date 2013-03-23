@@ -110,26 +110,26 @@
             accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
         });
 
-
-        $("#barchart-anchor3").mbarchart({data: [data2, data3, data4],
-            tooltip: true,
-            labels: {ylabel: "This is the y label",
-                     ypadding: 50,
-                     xlabel: "Mandiant barchart label",
-                     xpadding: 95,
-                     mainlabel: "bar chart"},
-            margins: {l:40, b: 80},
-            axis: { x : { rotateText: "angled",
-                          xoffset   : -40,
-                          yoffset   : 35
-                        }
-                  },
-            legend:{label: "Histogram Legend",
-                    serieslabels: ["first", "second", "third"]},
-            events: {onclick:onclick,
-                     onmouseover:onmouseover},
-            accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
-        });
+//
+//        $("#barchart-anchor3").mbarchart({data: [data2, data3, data4],
+//            tooltip: true,
+//            labels: {ylabel: "This is the y label",
+//                     ypadding: 50,
+//                     xlabel: "Mandiant barchart label",
+//                     xpadding: 95,
+//                     mainlabel: "bar chart"},
+//            margins: {l:40, b: 80},
+//            axis: { x : { rotateText: "angled",
+//                          xoffset   : -40,
+//                          yoffset   : 35
+//                        }
+//                  },
+//            legend:{label: "Histogram Legend",
+//                    serieslabels: ["first", "second", "third"]},
+//            events: {onclick:onclick,
+//                     onmouseover:onmouseover},
+//            accessors: {getX: function(d) {return d.groupby}, getY: function(d) {return d.intval;}}
+//        });
 
 
     </script>

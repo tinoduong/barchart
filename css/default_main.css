@@ -9,6 +9,11 @@
     /*border:1px solid red;*/
 }
 
+.axis .gridline {
+    stroke:rgba(0,0,0,0.3);
+    stroke-width:1px;
+}
+
 .mtooltip {
     /*width:100px;*/
     height:20px;

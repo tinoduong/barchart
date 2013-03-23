@@ -289,7 +289,14 @@
         self.svg
             .append("g")
             .attr("class", "y-axis axis")
-            .call(yAxis)
+            .call(yAxis.tickSize(-width, 0, 0))
+
+        self.svg
+            .selectAll(".y-axis line")
+            .attr("class", function(d, i){
+                return (i === 0) ? "tick" : "tick gridline";
+            })
+
 
         //Define x-axis ------
         self.svg
