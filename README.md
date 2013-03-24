@@ -22,6 +22,7 @@ mbarchat        : wrapper around the entire barchart
 mtooltip        : wrapper around the tooltip element
 bar             : the bars
 hover           : hover state for a bar
+gridlines       : selector for the horizontal gridlines crossing the y-axis
 axis-label      : on both labels x and y axis
 y-axis-label    : the label for the y axis (use this to set the font-size)
 x-axis-label    : the label for the x axis (use this to set the font-size)
