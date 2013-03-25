@@ -125,6 +125,8 @@ horizontally (default), angled, or vertically
 values: { x : { rotateText: string,
                 xoffset   : int,   //position the text left or right of the xaxis tick
                 yoffset   : int    //position the text above or below the xaxis tick
+                formatter : {type: string // either (number or date)
+                             format: string //d3js syntax for formatting
                 }}
 
 where the string is either "vertical", "angled", or "horizontal".
