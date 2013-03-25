@@ -69,6 +69,24 @@
 
         axis.x    = axis.x || {};
 
+        function parseFormatter(params) {
+
+            if (!params.format) {
+                return null;
+            }
+
+            if (params.type === "date") {
+
+                return d3.time.format(params.format);
+
+            } else if (params.type === "number") {
+
+                return d3.format(params.format);
+            }
+
+            return null;
+        }
+
         if (axis.x.rotateText === "angled") {
 
             toRet.x.rotation = -35;
@@ -81,6 +99,9 @@
             toRet.x.xoffset  = axis.x.xoffset || 15;
             toRet.x.yoffset  = axis.x.yoffset ||25;
         }
+
+        toRet.x.format   = axis.x.formatter ? parseFormatter(axis.x.formatter) : null;
+
 
         return toRet;
     };
@@ -284,6 +305,11 @@
         self.xRange = xRange;
         self.yRange = yRange;
         self.height = height;
+
+        if (axisParam.x.format) {
+
+            xAxis.tickFormat(axisParam.x.format);
+        }
 
         //Define y-axis ------
         self.svg
