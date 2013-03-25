@@ -11,6 +11,31 @@
         Barchart;
 
     /**
+     * Okay, we're not fully parsing an ISO because
+     * we're going to allow spaces and the lack of
+     * T and Z characters
+     * @param dateString
+     * @return {Date}
+     * @constructor
+     */
+    function ISOToDate (dateString) {
+
+        if (!dateString || typeof dateString !== 'string') {
+            throw new Error("Argument to ISOToDate must be a string");
+        }
+
+        var yyyy = parseInt(dateString.slice(0, 4), 10),
+            mm   = parseInt(dateString.slice(5, 7), 10) - 1,
+            dd   = parseInt(dateString.slice(8, 10), 10),
+            HH   = parseInt(dateString.slice(11, 13), 10),
+            MM   = parseInt(dateString.slice(14, 16), 10),
+            SS   = parseInt(dateString.slice(17, 19), 10),
+            dateObject = new Date(yyyy, mm, dd, HH, MM, SS);
+
+        return dateObject;
+    };
+
+    /**
      * ensure the dimensions don't have a width and height smaller than the default
      * specified in the fallback object
      * @param dimensions
@@ -71,13 +96,17 @@
 
         function parseFormatter(params) {
 
+            var d3Format;
+
             if (!params.format) {
                 return null;
             }
 
             if (params.type === "date") {
 
-                return d3.time.format(params.format);
+                d3Format = d3.time.format(params.format);
+
+                return function (d) { return d3Format(ISOToDate(d));}
 
             } else if (params.type === "number") {
 
@@ -101,7 +130,6 @@
         }
 
         toRet.x.format   = axis.x.formatter ? parseFormatter(axis.x.formatter) : null;
-
 
         return toRet;
     };
